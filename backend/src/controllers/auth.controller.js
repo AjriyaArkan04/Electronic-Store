@@ -102,8 +102,15 @@ class AuthController {
       });
 
     } catch (error) {
-      next(error);
-    }
+  console.error("REGISTER ERROR REAL:", error);
+
+  return res.status(500).json({
+    success: false,
+    message: error.message,
+    detail: error.detail || null,
+    stack: error.stack,
+  });
+}
   }
 }
 
