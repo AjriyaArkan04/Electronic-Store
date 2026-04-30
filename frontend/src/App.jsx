@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Items from './pages/Items'
+import Admin from './pages/Admin'
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/items" element={<Items />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

@@ -3,11 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 
 function ProductCard({ item }) {
+  const isOutOfStock = item.stock === 0
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 p-4">
+    <div className={`bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col items-center text-center border p-4 ${isOutOfStock ? 'border-red-200 opacity-60' : 'border-blue-100 hover:border-blue-300'}`}>
       <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-1">Electronics</p>
       <h3 className="text-sm font-semibold text-gray-900 leading-snug flex-1">{item.name}</h3>
-      <span className="mt-3 text-base font-extrabold text-blue-600">${item.price}</span>
+      <span className={`mt-3 text-base font-extrabold ${isOutOfStock ? 'text-red-500 line-through' : 'text-blue-600'}`}>${item.price}</span>
+      {isOutOfStock ? (
+        <span className="mt-1 text-xs font-bold text-red-500">Out of Stock</span>
+      ) : (
+        <span className="mt-1 text-xs text-gray-500">Stock: {item.stock}</span>
+      )}
     </div>
   )
 }
@@ -22,6 +29,8 @@ function Items() {
   useEffect(() => {
     fetchItems()
   }, [])
+
+  const userRole = localStorage.getItem('userRole')
 
   const fetchItems = async () => {
     try {
@@ -38,10 +47,22 @@ function Items() {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('userRole')
     navigate('/login')
   }
 
-  const filtered = items.filter((item) =>
+  const goToAdmin = () => {
+    navigate('/admin')
+  }
+
+  // Sort items: in stock first (by stock descending), then out of stock
+  const sortedItems = [...items].sort((a, b) => {
+    if (a.stock === 0 && b.stock !== 0) return 1
+    if (a.stock !== 0 && b.stock === 0) return -1
+    return b.stock - a.stock
+  })
+
+  const filtered = sortedItems.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase())
   )
 
@@ -74,9 +95,18 @@ function Items() {
             />
           </div>
 
+          {userRole === 'admin' && (
+            <button
+              onClick={goToAdmin}
+              className="text-xs font-bold text-white hover:bg-blue-700 border border-white px-4 py-2 rounded-xl transition"
+            >
+              Admin Panel
+            </button>
+          )}
+
           <button
             onClick={handleLogout}
-            className="ml-auto text-xs font-bold text-blue-100 hover:text-white border border-blue-400 hover:border-white px-4 py-2 rounded-xl transition"
+            className="text-xs font-bold text-blue-100 hover:text-white border border-blue-400 hover:border-white px-4 py-2 rounded-xl transition"
           >
             Sign out
           </button>
@@ -103,8 +133,8 @@ function Items() {
 
         {filtered.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filtered.map((item, index) => (
-              <ProductCard key={index} item={item} />
+            {filtered.map((item) => (
+              <ProductCard key={item.id} item={item} />
             ))}
           </div>
         ) : (

@@ -3,7 +3,8 @@ const ItemService = require('../services/item.service');
 class ItemController {
   static async getAllItems(req, res, next) {
     try {
-      const items = await ItemService.getAllItems();
+      const { sort } = req.query;
+      const items = await ItemService.getAllItems(sort);
       res.status(200).json({
         success: true,
         message: 'Items retrieved successfully',
@@ -42,7 +43,7 @@ class ItemController {
     }
   }
 
-  static async updateItem(req, res, next) {
+static async updateItem(req, res, next) {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -50,6 +51,20 @@ class ItemController {
       res.status(200).json({
         success: true,
         message: 'Item updated successfully',
+        payload: item,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async deleteItem(req, res, next) {
+    try {
+      const { id } = req.params;
+      const item = await ItemService.deleteItem(id);
+      res.status(200).json({
+        success: true,
+        message: 'Item deleted successfully',
         payload: item,
       });
     } catch (error) {

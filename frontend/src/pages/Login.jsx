@@ -8,7 +8,7 @@ function Login() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -17,7 +17,14 @@ function Login() {
 
       if (response.data.success) {
         localStorage.setItem('token', response.data.payload.token)
-        navigate('/items')
+        localStorage.setItem('userRole', response.data.payload.user.role)
+        
+        // Redirect based on role
+        if (response.data.payload.user.role === 'admin') {
+          navigate('/admin')
+        } else {
+          navigate('/items')
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed')
