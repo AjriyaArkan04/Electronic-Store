@@ -39,6 +39,13 @@ app.use('/items', itemRoutes);
 app.use('/transaction', transactionRoutes);
 app.use('/reports', reportRoutes);
 
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API is running',
+  });
+});
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
