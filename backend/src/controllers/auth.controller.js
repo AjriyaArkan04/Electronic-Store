@@ -8,11 +8,51 @@ const ADMIN_CREDENTIALS = {
 };
 
 class AuthController {
+
+  // =========================
+  // REGISTER (NEW)
+  // =========================
+  static async register(req, res, next) {
+    try {
+      const { name, username, email, password, phone } = req.body;
+
+      // basic validation
+      if (!name || !username || !email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing required fields',
+          payload: null
+        });
+      }
+
+      // call service
+      const user = await UserService.register({
+        name,
+        username,
+        email,
+        password,
+        phone
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        payload: user
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // =========================
+  // LOGIN (EXISTING - FIXED)
+  // =========================
   static async login(req, res, next) {
     try {
       const { email, password } = req.body;
 
-// Check for hardcoded admin login
+      // Admin login
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
         const adminUser = {
           id: 0,
@@ -40,7 +80,7 @@ class AuthController {
         });
       }
 
-      // Regular user login
+      // User login
       const result = await UserService.login(email, password);
 
       const token = jwt.sign(
@@ -49,19 +89,18 @@ class AuthController {
         { expiresIn: '24h' }
       );
 
-      const userWithRole = {
-        ...result.user,
-        role: 'user'
-      };
-
       res.status(200).json({
         success: true,
         message: 'Login successful',
         payload: {
           token,
-          user: userWithRole,
+          user: {
+            ...result.user,
+            role: 'user'
+          },
         },
       });
+
     } catch (error) {
       next(error);
     }
