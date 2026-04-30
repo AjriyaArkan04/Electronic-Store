@@ -4,16 +4,17 @@ const db = require('./src/config/database');
 
 const PORT = process.env.PORT || 3000;
 
-// Test database connection
+// Start server FIRST
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Test DB separately (non-blocking)
 db.query('SELECT NOW()')
   .then(() => {
     console.log('Database connected successfully');
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
   })
   .catch((err) => {
-    console.error('Database connection failed:', err);
-    process.exit(1);
+    console.error('Database connection failed:', err.message);
   });
